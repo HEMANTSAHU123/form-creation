@@ -1,4 +1,5 @@
 import http from 'http';
+import fs from 'fs'
 const server=http.createServer((req,res)=>{
 const url=req.url;
 const method=req.method;
@@ -15,23 +16,30 @@ if(req.url==='/'){
     )}
     else {
         if(url==='/message'){
-            res.setHeader('Content-type','text/html');
-            let datachunks=[];
-            req.on('data',(chunks)=>{
-                console.log(chunks)
-                datachunks.push(chunks)
-            })
-            req.on('end',()=>{
-                let combinedbuffer=Buffer.concat(datachunks)
-                console.log(combinedbuffer.toString())
-                let value=combinedbuffer.toString().split("=")
-                console.log(value)
+           let body=[];
+           req.on('data',(chunks)=>{
+            body.push(chunks)
 
+           });
+           req.on("end",()=>{
+            let buffer=Buffer.concat(body)
+            console.log(buffer)
+            let formdata=buffer.toString();
+            console.log(formdata)
+            const formvalues=formdata.split('')[1]
+            fs.writeFile('formvalues.txt',formvalues,(error)=>{
+res.statusCode=302//status error
+res.setHeader('Location','/')
+res.end();
             })
+
+
+           })
+
         }
     }
 })
-server.listen(302,()=>{
+server.listen(3003,()=>{
 console.log("server is running")
 })
 
